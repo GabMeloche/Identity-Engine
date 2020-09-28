@@ -72,15 +72,6 @@ Engine::Components::BoxCollider::BoxCollider(Objects::GameObject* p_gameObject, 
 
         words.clear();
     }
-
-    //TODO: Memory leak here
-    /*delete m_box;
-    delete m_rigidbody;
-    delete m_motionState;*/
-
-    // m_box->getHalfExtentsWithMargin().getX()
-    // m_box->getHalfExtentsWithMargin().getY()
-    // m_box->getHalfExtentsWithMargin().getZ()
     
     m_dimensions = { m_box->getHalfExtentsWithMargin().getX(),
                      m_box->getHalfExtentsWithMargin().getY(),
@@ -108,7 +99,6 @@ Engine::Components::BoxCollider::BoxCollider(Objects::GameObject* p_gameObject, 
 
     ObjectElements::Model model = ConstructBox();
 
-    //TODO add a "AddModel" that take a model as parametre
     const int32_t id = Managers::ResourceManager::AddModel(model);
     m_model = Managers::ResourceManager::FindModel(id);
 
@@ -125,7 +115,6 @@ Engine::Components::BoxCollider::BoxCollider(Objects::GameObject* p_gameObject, 
     m_dimensions = p_other->m_dimensions;
 
     btTransform trans;
-    // p_other->m_motionState->getWorldTransform(trans);
     auto       position = m_gameObject->GetTransform()->GetPosition();
     auto       rotation = m_gameObject->GetTransform()->GetRotation();
     
@@ -134,8 +123,6 @@ Engine::Components::BoxCollider::BoxCollider(Objects::GameObject* p_gameObject, 
     
     offsetD = { q.GetXAxisValue(), q.GetYAxisValue(), q.GetZAxisValue() };
     Vector3D offset = offsetD;
-    
-    // position += offset;
     
     trans.setIdentity();
     trans.setOrigin(btVector3(position.x, position.y, position.z));
@@ -149,7 +136,6 @@ Engine::Components::BoxCollider::BoxCollider(Objects::GameObject* p_gameObject, 
     m_rigidbody = new btRigidBody(rbInfo);
 
     ObjectElements::Model model = ConstructBox();
-    //TODO add a "AddModel" that take a model as parametre
     const int32_t id = Managers::ResourceManager::AddModel(model);
     m_model = Managers::ResourceManager::FindModel(id);
 
@@ -242,7 +228,6 @@ void Engine::Components::BoxCollider::Deserialize(Objects::GameObject* p_gameObj
 
     ObjectElements::Model model = ConstructBox();
 
-    //TODO add a "AddModel" that take a model as parametre
     const int32_t id = Managers::ResourceManager::AddModel(model);
     m_model = Managers::ResourceManager::FindModel(id);
 }
@@ -353,7 +338,6 @@ void Engine::Components::BoxCollider::SetActive(bool p_active)
     {
         m_rigidbody->forceActivationState(ACTIVE_TAG);
         m_rigidbody->setCollisionFlags(!btCollisionObject::CF_NO_CONTACT_RESPONSE);
-        //Systems::PhysicsSystem::GetWorld()->addCollisionObject(m_rigidbody);
     }
 }
 

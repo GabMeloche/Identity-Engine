@@ -16,9 +16,6 @@ void Engine::Physics::ICollider::OnCollisionEnter()
     }
     if (m_gameObject->GetName() == "Ball")
     {
-        //m_gameObject->FindComponentOfType<Components::Sound>()->Stop();
-        //m_gameObject->FindComponentOfType<Components::Sound>()->PlaySound();
-
         auto support = Managers::SceneManager::GetActiveScene()->GetGameObject("Steep1SupportRight");
         if (support && m_collisionInfo->GetCollision()->GetName() == "Steep1")
             support->FindComponentOfType<Components::BoxCollider>()->SetMass(10);

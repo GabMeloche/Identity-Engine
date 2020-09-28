@@ -12,14 +12,8 @@
 Engine::Systems::PhysicsSystem::PhysicsSystem()
 {
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
-
-    ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
-
-    ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
     m_overlappingPairCache = new btDbvtBroadphase();
-
-    ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
     m_solver = new btSequentialImpulseConstraintSolver;
 
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
@@ -30,6 +24,11 @@ Engine::Systems::PhysicsSystem::PhysicsSystem()
 
 Engine::Systems::PhysicsSystem::~PhysicsSystem()
 {
+    delete m_collisionConfiguration;
+    delete m_dispatcher;
+    delete m_overlappingPairCache;
+    delete m_solver;
+    delete m_dynamicsWorld;
     delete m_instance;
 }
 
@@ -64,6 +63,7 @@ void Engine::Systems::PhysicsSystem::Update(const float p_deltaTime)
         if (!collider.second->IsActive())
             continue;
 
+        //Calculate Collider's position with offset
         btTransform trans;
         trans.setIdentity();
         auto position = collider.second->GetGameObject()->GetTransform()->GetPosition();
@@ -75,6 +75,7 @@ void Engine::Systems::PhysicsSystem::Update(const float p_deltaTime)
         Vector3D offset = offsetD;
         position += offset;
 
+        //Set Collider's transform in Bullet Physics world
         trans.setIdentity();
         trans.setOrigin(btVector3(position.x, position.y, position.z));
         trans.setRotation(btQuaternion(rotation.GetXAxisValue(), rotation.GetYAxisValue(), rotation.GetZAxisValue(), rotation.w));
@@ -84,6 +85,7 @@ void Engine::Systems::PhysicsSystem::Update(const float p_deltaTime)
     }
 }
 
+//Called every 0.016 seconds, or ~60 times per second in Core::App
 void Engine::Systems::PhysicsSystem::FixedUpdate()
 {
     btTransform trans;
@@ -99,7 +101,7 @@ void Engine::Systems::PhysicsSystem::FixedUpdate()
     }
 
     //Bullet simulate physics
-    GetInstance()->m_dynamicsWorld->stepSimulation(0.016, 0);
+    GetInstance()->m_dynamicsWorld->stepSimulation(0.016f, 0.0f);
 
     //Update collider positions
     for (auto& collider : GetInstance()->m_colliders)
@@ -135,7 +137,7 @@ void Engine::Systems::PhysicsSystem::FixedUpdate()
     }
 }
 
-//Called during m_dynamicsWorld->StepSimulation()
+//Called during m_dynamicsWorld->StepSimulation(); Checks for collisions and creates CollisionInfos if needed
 void Engine::Systems::PhysicsSystem::BulletTickCallback(btDynamicsWorld* p_world, btScalar p_timeStep)
 {
     int numManifolds = GetInstance()->m_dynamicsWorld->getDispatcher()->getNumManifolds();
